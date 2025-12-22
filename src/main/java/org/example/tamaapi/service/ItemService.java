@@ -41,7 +41,6 @@ public class ItemService {
 
     //-------------동기화 로직----------------
     public void syncItem(ItemSyncResponse res){
-        System.out.println("res.getColorItemImages = " + res.getColorItemImages());
 
         //db에 상품 반영
         saveItem(res.getItem().toEntity());

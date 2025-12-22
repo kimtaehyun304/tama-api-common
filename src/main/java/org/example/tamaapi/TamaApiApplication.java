@@ -4,6 +4,7 @@ import org.springframework.batch.core.configuration.annotation.EnableBatchProces
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.retry.annotation.EnableRetry;
@@ -20,6 +21,7 @@ import static org.springframework.data.web.config.EnableSpringDataWebSupport.Pag
 @EnableRetry
 @EnableBatchProcessing
 @EnableSpringDataWebSupport(pageSerializationMode = VIA_DTO)
+@EnableFeignClients
 public class TamaApiApplication {
 
     public static void main(String[] args) {
