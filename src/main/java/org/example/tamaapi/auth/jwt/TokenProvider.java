@@ -3,7 +3,6 @@ package org.example.tamaapi.auth.jwt;
 
 import io.jsonwebtoken.*;
 import lombok.RequiredArgsConstructor;
-import org.example.tamaapi.auth.CustomPrincipal;
 import org.example.tamaapi.domain.user.Member;
 import org.example.tamaapi.exception.MyExpiredJwtException;
 import org.example.tamaapi.exception.OrderFailException;
@@ -63,8 +62,7 @@ public class TokenProvider {
 
         try {
             Long memberId = Long.valueOf(claims.getSubject());
-            CustomPrincipal customPrincipal = new CustomPrincipal(memberId, null);
-            return new UsernamePasswordAuthenticationToken(customPrincipal, token);
+            return new UsernamePasswordAuthenticationToken(memberId, token);
         } catch (Exception e){
             throw new OrderFailException("memberId 누락");
         }

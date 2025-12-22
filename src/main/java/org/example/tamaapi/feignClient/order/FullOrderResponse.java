@@ -47,10 +47,10 @@ public class FullOrderResponse {
     private List<FullOrderItemResponse> orderItems = new ArrayList<>();
 
     public Order ToEntity(){
-        Member member = new Member(this.memberId);
-        return new Order(this.id, member, this.delivery, this.status, this.guest,
-                this.memberCouponId, this.usedCouponPrice, this.usedPoint, this.shippingFee, this.paymentId,
-                this.createdAt, this.updatedAt);
+        Member member = new Member(memberId);
+        return new Order(id, member, delivery, status, guest,
+                memberCouponId, usedCouponPrice, usedPoint, shippingFee, paymentId,
+                createdAt, updatedAt);
     }
 
 }

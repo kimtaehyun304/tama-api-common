@@ -31,4 +31,13 @@ public class Member extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Authority authority;
 
+    public Member(Long id, String nickname, Authority authority) {
+        this.id = id;
+        this.nickname = nickname;
+        this.authority = authority;
+    }
+
+    public Member(Long id) {
+        this.id = id;
+    }
 }

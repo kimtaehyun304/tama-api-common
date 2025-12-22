@@ -28,14 +28,11 @@ public class  OrderItem {
 
     private int count;
 
-    //setOrder는 createOrder에서 연관메서드로 함
-    @Builder
-    public OrderItem(ColorItemSizeStock colorItemSizeStock, int orderPrice, int count) {
+    public OrderItem(Long id, Order order, ColorItemSizeStock colorItemSizeStock, int orderPrice, int count) {
+        this.id = id;
+        this.order = order;
         this.colorItemSizeStock = colorItemSizeStock;
         this.orderPrice = orderPrice;
         this.count = count;
-        //변경감지는 동시성 문제 있음 → 직접 update로 변경
-        //colorItemSizeStock.removeStock(count);
     }
-
 }

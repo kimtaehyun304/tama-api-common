@@ -31,8 +31,9 @@ public class FullOrderItemResponse {
     private int count;
 
     public OrderItem toEntity(){
-        Order order = new Order(this.orderId);
-        return new OrderItem(this.id, order, this.colorItemSizeStockId, this.orderPrice, this.count);
+        Order order = new Order(orderId);
+        ColorItemSizeStock colorItemSizeStock = new ColorItemSizeStock(colorItemSizeStockId);
+        return new OrderItem(id, order, colorItemSizeStock, orderPrice, count);
     }
 
 }

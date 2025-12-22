@@ -3,7 +3,6 @@ package org.example.tamaapi.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.tamaapi.auth.CustomPrincipal;
 import org.example.tamaapi.aspect.PreAuthentication;
 import org.example.tamaapi.dto.requestDto.CustomPageRequest;
 import org.example.tamaapi.dto.responseDto.CustomPage;
@@ -32,11 +31,11 @@ public class OrderApiController {
 
     //멤버 주문 조회
     @GetMapping("/api/orders/member")
-    public CustomPage<MemberOrderResponse> orders(@AuthenticationPrincipal CustomPrincipal principal, @Valid @ModelAttribute CustomPageRequest customPageRequest) {
-        if (principal == null)
+    public CustomPage<MemberOrderResponse> orders(@AuthenticationPrincipal Long memberId, @Valid @ModelAttribute CustomPageRequest customPageRequest) {
+        if (memberId == null)
             throw new IllegalArgumentException("액세스 토큰이 비었습니다.");
         //조회라 굳이 멤버 존재 체크 안필요
-        return orderQueryRepository.findMemberOrdersWithPaging(customPageRequest, principal.getMemberId());
+        return orderQueryRepository.findMemberOrdersWithPaging(customPageRequest, memberId);
     }
 
     //비로그인 주문 조회

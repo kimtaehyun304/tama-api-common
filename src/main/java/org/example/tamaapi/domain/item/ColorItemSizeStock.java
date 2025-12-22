@@ -38,34 +38,15 @@ public class ColorItemSizeStock {
     @OneToMany(mappedBy = "colorItemSizeStock")
     private List<OrderItem> orderItems = new ArrayList<>();
 
-    /*
-    @Builder
-    public ColorItemSizeStock(ColorItem colorItem, String size, int stock) {
+
+    public ColorItemSizeStock(Long id, ColorItem colorItem, String size, int stock) {
+        this.id = id;
         this.colorItem = colorItem;
         this.size = size;
         this.stock = stock;
     }
 
-    /* 동시 요청시 재고 음수되는 가능성
-    public void removeStock(int quantity) {
-        int restStock = this.stock - quantity;
-        if (restStock < 0)
-            throw new MyBadRequestException("재고가 부족합니다.");
-        this.stock = restStock;
+    public ColorItemSizeStock(Long id) {
+        this.id = id;
     }
-
-
-    public void removeStock(int quantity) {
-        int restStock = this.stock - quantity;
-        if (restStock < 0)
-            throw new MyBadRequestException("재고가 부족합니다.");
-        this.stock = restStock;
-    }
-
-    public void changeStock(int quantity) {
-        this.stock = quantity;
-    }
-
-    */
-
 }

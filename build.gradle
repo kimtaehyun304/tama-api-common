@@ -23,11 +23,19 @@ repositories {
     mavenCentral()
 }
 
+
+ext {
+    set('springCloudVersion', "2024.0.1")
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
+}
+
 dependencies {
-    runtimeOnly("com.mysql:mysql-connector-j")
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.hibernate.orm:hibernate-core:6.2.0.CR2'
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-web'
@@ -36,26 +44,37 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-aop'
     implementation 'org.springframework.boot:spring-boot-starter-cache'
     implementation 'org.springframework.boot:spring-boot-starter-batch'
-    implementation 'com.github.ben-manes.caffeine:caffeine'
     implementation 'org.springframework.retry:spring-retry'
-    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    implementation 'com.github.ben-manes.caffeine:caffeine'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
+
+    //msa
+    implementation 'org.springframework.kafka:spring-kafka'
+    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+    implementation("io.github.openfeign:feign-hc5")
+
+    //lombok
     compileOnly 'org.projectlombok:lombok'
-
-    developmentOnly  'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.0'
-
     annotationProcessor 'org.projectlombok:lombok'
     testCompileOnly 'org.projectlombok:lombok'
     testAnnotationProcessor 'org.projectlombok:lombok'
 
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.springframework.security:spring-security-test'
-    runtimeOnly 'com.h2database:h2'
+    //third-party
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     implementation 'io.jsonwebtoken:jjwt:0.9.1'
     implementation 'javax.xml.bind:jaxb-api:2.3.1'
     implementation('org.apache.commons:commons-text:1.10.0')
     implementation(platform("software.amazon.awssdk:bom:2.27.21"))
     implementation("software.amazon.awssdk:s3")
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    implementation  'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.0'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0'
+
+    //db
+    runtimeOnly 'com.h2database:h2'
+    runtimeOnly("com.mysql:mysql-connector-j")
+    implementation 'org.hibernate.orm:hibernate-core:6.2.0.CR2'
 
     //Querydsl 추가
     implementation 'com.querydsl:querydsl-jpa:5.1.0:jakarta'

@@ -27,8 +27,9 @@ public class ColorItemImage {
     //@Column
     //private String src;
 
-    @Builder
-    public ColorItemImage(ColorItem colorItem, UploadFile uploadFile, Integer sequence) {
+
+    public ColorItemImage(Long id, ColorItem colorItem, UploadFile uploadFile, Integer sequence) {
+        this.id = id;
         this.colorItem = colorItem;
         this.uploadFile = uploadFile;
         this.sequence = sequence;

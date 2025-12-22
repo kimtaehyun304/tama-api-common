@@ -78,8 +78,7 @@ public class Item extends BaseEntity {
     @OneToMany(mappedBy = "item")
     private List<ColorItem> colorItems = new ArrayList<>();
 
-    @Builder
-    public Item(Integer originalPrice, Integer nowPrice, Gender gender, String yearSeason, String name, String description, LocalDate dateOfManufacture, String countryOfManufacture, String manufacturer, Category category, String textile, String precaution) {
+    public Item(Long id,Integer originalPrice, Integer nowPrice, Gender gender, String yearSeason, String name, String description, LocalDate dateOfManufacture, String countryOfManufacture, String manufacturer, Category category, String textile, String precaution) {
         this.originalPrice = originalPrice;
         this.nowPrice = nowPrice;
         this.gender = gender;
@@ -96,6 +95,10 @@ public class Item extends BaseEntity {
 
     //배치작업 용
     public void setIdByReturningId(Long id) {
+        this.id = id;
+    }
+
+    public Item(Long id) {
         this.id = id;
     }
 }

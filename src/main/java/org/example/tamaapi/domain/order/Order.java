@@ -9,6 +9,7 @@ import org.example.tamaapi.domain.user.coupon.MemberCoupon;
 import org.example.tamaapi.domain.user.Guest;
 import org.example.tamaapi.domain.user.Member;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,9 +39,7 @@ public class Order extends BaseEntity {
     @Embedded
     private Guest guest;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
-    @JoinColumn(name = "member_coupon_id", unique = true)
-    private MemberCoupon memberCoupon;
+    private Long memberCouponId;
 
     //매번 계산할 수 있지만 코드가 복잡해져서 필드 만듬
     //할인 금액이 의미있는 정보이기도 함
@@ -59,7 +58,24 @@ public class Order extends BaseEntity {
     //@BatchSize(size = 1000) osiv off
     private List<OrderItem> orderItems = new ArrayList<>();
 
+    public Order(Long id, Member member, Delivery delivery, OrderStatus status, Guest guest, Long memberCouponId,
+                 int usedCouponPrice, int usedPoint, int shippingFee, String paymentId, LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this.id = id;
+        this.member = member;
+        this.delivery = delivery;
+        this.status = status;
+        this.guest = guest;
+        this.memberCouponId = memberCouponId;
+        this.usedCouponPrice = usedCouponPrice;
+        this.usedPoint = usedPoint;
+        this.shippingFee = shippingFee;
+        this.paymentId = paymentId;
+        setCreatedAt(createdAt);
+        setUpdatedAt(updatedAt);
+    }
 
-
+    public Order(Long id) {
+        this.id = id;
+    }
 }
 

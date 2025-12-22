@@ -34,10 +34,7 @@ public class Color {
     @OneToMany(mappedBy = "parent")
     private List<Color> children = new ArrayList<>();
 
-    @Builder
-    public Color(String name, String hexCode, Color parent) {
-        this.name = name;
-        this.hexCode = hexCode;
-        this.parent = parent;
+    public Color(Long id) {
+        this.id = id;
     }
 }

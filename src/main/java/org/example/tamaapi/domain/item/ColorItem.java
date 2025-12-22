@@ -38,10 +38,15 @@ public class ColorItem extends BaseEntity {
     @BatchSize(size = 1000)
     private List<ColorItemSizeStock> colorItemSizeStocks = new ArrayList<>();
 
-    @Builder
-    public ColorItem(Item item, Color color) {
+
+    public ColorItem(Long id, Item item, Color color) {
+        this.id = id;
         this.item = item;
         this.color = color;
+    }
+
+    public ColorItem(Long id) {
+        this.id = id;
     }
 
     public void setIdAfterBatch(Long id){
