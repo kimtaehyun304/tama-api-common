@@ -14,7 +14,6 @@ import java.util.List;
 public class ColorItem extends BaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "color_item_id")
     private Long id;
 

@@ -21,7 +21,6 @@ import java.util.List;
 public class ColorItemSizeStock {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "color_item_size_stock_id")
     private Long id;
 

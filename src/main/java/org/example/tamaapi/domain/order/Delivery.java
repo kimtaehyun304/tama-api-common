@@ -10,7 +10,6 @@ import org.example.tamaapi.domain.BaseEntity;
 public class Delivery extends BaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "delivery_id")
     private Long id;
 

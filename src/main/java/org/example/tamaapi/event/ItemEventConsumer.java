@@ -10,6 +10,9 @@ import org.example.tamaapi.feignClient.item.*;
 import org.example.tamaapi.repository.item.ItemRepository;
 import org.example.tamaapi.service.ItemService;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.annotation.RetryableTopic;
+import org.springframework.kafka.support.Acknowledgment;
+import org.springframework.retry.annotation.Backoff;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,9 +26,14 @@ public class ItemEventConsumer {
     private final ItemFeignClient itemFeignClient;
     private final ItemService itemService;
 
-    @KafkaListener(topics = ITEM_TOPIC)
-    public void consumeItemCreatedEvent(ItemCreatedEvent event) {
+    @RetryableTopic(
+            attempts = "3",
+            backoff = @Backoff(delay = 5000, multiplier = 2)
+    )
+    @KafkaListener(topics = ITEM_TOPIC, groupId = "item_consumer_group")
+    public void consumeItemCreatedEvent(ItemCreatedEvent event, Acknowledgment ack) {
         ItemSyncResponse res = itemFeignClient.getItem(event.itemId());
         itemService.syncItem(res);
+        ack.acknowledge();
     }
 }

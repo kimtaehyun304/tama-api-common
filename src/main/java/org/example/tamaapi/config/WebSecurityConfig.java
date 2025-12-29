@@ -80,29 +80,4 @@ public class WebSecurityConfig {
         return http.build();
     }
 
-
-    /*
-    @Bean
-    public TokenAuthenticationFilter tokenAuthenticationFilter() {
-        return new TokenAuthenticationFilter(tokenProvider);
-    }
-
-
-    @Bean
-    public BCryptPasswordEncoder bCryptPasswordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
-
-    @Bean
-    public OAuth2SuccessHandler oAuth2SuccessHandler() {
-        return new OAuth2SuccessHandler(tokenProvider, memberRepository, oAuth2AuthorizationRequestBasedOnCookieRepository(), cacheService);
-    }
-
-    @Bean
-    public OAuth2AuthorizationRequestBasedOnCookieRepository oAuth2AuthorizationRequestBasedOnCookieRepository() {
-        return new OAuth2AuthorizationRequestBasedOnCookieRepository();
-    }
-
-     */
 }

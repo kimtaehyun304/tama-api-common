@@ -9,6 +9,9 @@ import org.example.tamaapi.feignClient.order.OrderFeignClient;
 import org.example.tamaapi.service.ItemService;
 import org.example.tamaapi.service.OrderService;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.annotation.RetryableTopic;
+import org.springframework.kafka.support.Acknowledgment;
+import org.springframework.retry.annotation.Backoff;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,9 +24,13 @@ public class OrderEventConsumer {
 
     private final OrderService orderService;
 
-
-    @KafkaListener(topics = ORDER_TOPIC)
-    public void consumeOrderCreatedEvent(OrderCreatedEvent event) {
+    @RetryableTopic(
+            attempts = "3",
+            backoff = @Backoff(delay = 5000, multiplier = 2)
+    )
+    @KafkaListener(topics = ORDER_TOPIC, groupId = "order_consumer_group")
+    public void consumeOrderCreatedEvent(OrderCreatedEvent event, Acknowledgment ack) {
         orderService.syncOrder(event.orderId());
+        ack.acknowledge();
     }
 }

@@ -18,7 +18,6 @@ import org.hibernate.annotations.DynamicUpdate;
 public class MemberCoupon extends BaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "member_coupon_id")
     private Long id;
 
