@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.tamaapi.domain.user.Member;
 import org.example.tamaapi.exception.MyExpiredJwtException;
 import org.example.tamaapi.exception.OrderFailException;
+import org.springframework.data.util.Pair;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -42,18 +43,18 @@ public class TokenProvider {
                 .compact();
     }
 
-    public boolean validateToken(String token) {
+    public Pair<Boolean, String> validateToken(String token) {
         try {
             Jwts.parser()
                     .setSigningKey(jwtProperties.getSecretKey())
                     .parseClaimsJws(token);
-            return true;
+            return Pair.of(true, "");
         } catch (MalformedJwtException e) {
-            throw new IllegalArgumentException("토큰이 첨부되지 않았습니다");
+            return Pair.of(false, "토큰이 첨부되지 않았습니다");
         } catch (ExpiredJwtException e) {
-            throw new MyExpiredJwtException("토큰 유효기간이 만료되었습니다.");
+            return Pair.of(false, "토큰 유효기간이 만료되었습니다");
         } catch (Exception e) {
-            throw new IllegalArgumentException("유효하지 않은 토큰입니다.");
+            return Pair.of(false, "유효하지 않은 토큰입니다");
         }
     }
 

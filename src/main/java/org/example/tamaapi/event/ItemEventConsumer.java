@@ -36,4 +36,5 @@ public class ItemEventConsumer {
         itemService.syncItem(res);
         ack.acknowledge();
     }
+
 }
