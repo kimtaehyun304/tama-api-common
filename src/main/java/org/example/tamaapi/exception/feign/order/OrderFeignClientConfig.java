@@ -12,7 +12,7 @@ public class OrderFeignClientConfig {
 
     private final ObjectMapper objectMapper;
     
-    @Bean(name = "memberErrorDecoder")
+    @Bean(name = "orderErrorDecoder")
     public ErrorDecoder errorDecoder() {
         return new OrderFeignErrorDecoder(objectMapper);
     }

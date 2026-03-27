@@ -50,95 +50,7 @@ public class ItemQueryRepository {
     private final ColorItemImageRepository colorItemImageRepository;
     private final JPAQueryFactory queryFactory;
 
-    //★카테고리 아이템 (상품 검색)
-    public CustomPage<CategoryItemQueryDto> findCategoryItemsWithPagingAndSort(CustomSort sort, CustomPageRequest customPageRequest, List<Long> categoryIds, String itemName, Integer minPrice, Integer maxPrice, List<Long> colorIds, List<Gender> genders, Boolean isContainSoldOut) {
-        //페이징
-        List<CategoryItemQueryDto> paging = findCategoryItemsParent(customPageRequest, sort, categoryIds, itemName, minPrice, maxPrice, colorIds, genders, isContainSoldOut);
 
-        //자식 컬렉션 (해당 페이지 자식만)
-        List<Long> pagedItemIds = paging.stream().map(CategoryItemQueryDto::getItemId).toList();
-        Map<Long, List<RelatedColorItemResponse>> childrenMap = findCategoryItemsChildrenMap(pagedItemIds, colorIds, isContainSoldOut);
-        paging.forEach(p -> p.setRelatedColorItems(childrenMap.get(p.getItemId())));
-
-        Long rowCount = countCategoryItems(categoryIds, itemName, minPrice, maxPrice, colorIds, genders, isContainSoldOut);
-
-        //커스텀 페이징 변환
-        return new CustomPage<>(paging, customPageRequest, rowCount);
-    }
-
-    //카테고리 아이템 부모
-    private List<CategoryItemQueryDto> findCategoryItemsParent(CustomPageRequest customPageRequest, CustomSort sort, List<Long> categoryIds, String itemName, Integer minPrice, Integer maxPrice, List<Long> colorIds, List<Gender> genders, Boolean isContainSoldOut) {
-        QItem itemSub = new QItem("itemSub");
-
-        return queryFactory
-                .select(new QCategoryItemQueryDto(
-                        item.id,
-                        item.name,
-                        item.originalPrice,
-                        item.nowPrice
-                ))
-                .from(item)
-                .where(
-                        item.id.in(
-                                JPAExpressions
-                                        .selectDistinct(itemSub.id)
-                                        .from(itemSub)
-                                        .join(itemSub.colorItems, colorItem)
-                                        .join(colorItem.colorItemSizeStocks, colorItemSizeStock)
-                                        .where(
-                                                categoryIdIn(categoryIds),
-                                                itemNameContains(itemName),
-                                                minPriceGoe(minPrice),
-                                                maxPriceLoe(maxPrice),
-                                                colorIdIn(colorIds),
-                                                genderIn(genders),
-                                                isContainSoldOut(isContainSoldOut)
-                                        )
-                        )
-                )
-                .orderBy(categoryItemSort(sort))
-                .offset((long) (customPageRequest.getPage() - 1) * customPageRequest.getSize())
-                .limit(customPageRequest.getSize())
-                .fetch();
-    }
-
-    //카테고리 아이템 COUNT (최적화를 위해 따로 분리)
-    private Long countCategoryItems(List<Long> categoryIds, String itemName, Integer minPrice, Integer maxPrice, List<Long> colorIds, List<Gender> genders, Boolean isContainSoldOut) {
-        return queryFactory.select(item.count()).from(item)
-                .where(JPAExpressions
-                        .selectOne().from(colorItem).join(colorItem.colorItemSizeStocks, colorItemSizeStock)
-                        .where(colorItem.item.id.eq(item.id), categoryIdIn(categoryIds), itemNameContains(itemName), minPriceGoe(minPrice), maxPriceLoe(maxPrice)
-                                , colorIdIn(colorIds), genderIn(genders), isContainSoldOut(isContainSoldOut))
-                        .exists())
-                .fetchOne();
-    }
-
-    //카테고리 아이템 자식 컬렉션 & InItemIds로 item 컬럼에 해당하는 검색 조건 대체 가능
-    private Map<Long, List<RelatedColorItemResponse>> findCategoryItemsChildrenMap(List<Long> itemIds, List<Long> colorIds, Boolean isContainSoldOut) {
-        //item.id.in(itemIds)에서 itemIds가 비어있으면 where 1=2 되면서 그룹바이 에러 발생 -> 빈 map 반환
-        if(CollectionUtils.isEmpty(itemIds))
-            return Collections.emptyMap();
-
-        List<RelatedColorItemResponse> relatedColorItems = queryFactory.select
-                        (new QRelatedColorItemResponse(colorItem.item.id, colorItem.id, color.name, color.hexCode, colorItemSizeStock.stock.sum()))
-                .from(colorItem).join(colorItem.color, color).join(colorItem.colorItemSizeStocks, colorItemSizeStock)
-                .where(item.id.in(itemIds), colorIdIn(colorIds), isContainSoldOut(isContainSoldOut))
-                .groupBy(colorItem.id)
-                .fetch();
-
-        //이미지 세팅
-        List<Long> colorItemIds = relatedColorItems.stream().map(RelatedColorItemResponse::getColorItemId).toList();
-
-        //1차캐시 재사용은 findById만 되서 map 씀. 찾는 조건이 pk가 아니라 colorItemId라 findById 안됨
-        List<ColorItemImage> colorItemImages = colorItemImageRepository.findAllByColorItemIdInAndSequence(colorItemIds, 1);
-        Map<Long, UploadFile> uploadFileMap = colorItemImages.stream().collect(Collectors.toMap(c -> c.getColorItem().getId(), ColorItemImage::getUploadFile));
-
-        relatedColorItems.forEach(rci -> rci.setUploadFile(
-                uploadFileMap.get(rci.getColorItemId())
-        ));
-
-        return relatedColorItems.stream().collect(Collectors.groupingBy(RelatedColorItemResponse::getItemId));
-    }
 
     //--------------------------------------------------------------------------------------------------------------------------------------------------------
     //★카테고리 베스트 아이템 (인기 상품 조회)
@@ -214,35 +126,8 @@ public class ItemQueryRepository {
         };
     }
 
-    private BooleanExpression itemNameContains(String itemName) {
-        return hasText(itemName) ? item.name.contains(itemName) : null;
-    }
-
     private BooleanExpression categoryIdIn(List<Long> categoryIds) {
         return isEmpty(categoryIds) ? null : category.id.in(categoryIds);
-    }
-
-    private BooleanExpression minPriceGoe(Integer minPrice) {
-        if (minPrice == null) return null;
-        return item.nowPrice.goe(minPrice);
-    }
-
-    private BooleanExpression maxPriceLoe(Integer maxPrice) {
-        if (maxPrice == null) return null;
-        return item.nowPrice.loe(maxPrice);
-    }
-
-
-    private BooleanExpression colorIdIn(List<Long> colorIds) {
-        return isEmpty(colorIds) ? null : color.id.in(colorIds);
-    }
-
-    private BooleanExpression genderIn(List<Gender> genders) {
-        return isEmpty(genders) ? null : item.gender.in(genders);
-    }
-
-    private BooleanExpression isContainSoldOut(Boolean isContainSoldOut) {
-        return isTrue(isContainSoldOut) ? null : colorItemSizeStock.stock.gt(0);
     }
 
 }

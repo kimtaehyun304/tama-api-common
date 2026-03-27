@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
 
-@FeignClient(name = "order-service", url = "http://localhost:5001"
+@FeignClient(name = "order-service", url = "http://localhost:5002"
         ,configuration = OrderFeignClientConfig.class
         ,fallbackFactory = OrderFallbackFactory.class)
 public interface OrderFeignClient {

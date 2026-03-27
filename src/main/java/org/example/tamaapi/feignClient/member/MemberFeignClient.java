@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
 
-@FeignClient(name = "member-service", url = "http://localhost:5003"
+@FeignClient(name = "member-service", url = "http://localhost:5004"
         ,configuration = MemberFeignClientConfig.class
         ,fallbackFactory = MemberFallbackFactory.class)
 public interface MemberFeignClient {

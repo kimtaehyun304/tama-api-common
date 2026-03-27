@@ -31,18 +31,16 @@ public class ColorItemSizeStock {
     @Column(nullable = false)
     private String size;
 
-    @Column(nullable = false)
-    private int stock;
+    //stock 컬럼 필요 없음
 
     @OneToMany(mappedBy = "colorItemSizeStock")
     private List<OrderItem> orderItems = new ArrayList<>();
 
 
-    public ColorItemSizeStock(Long id, ColorItem colorItem, String size, int stock) {
+    public ColorItemSizeStock(Long id, ColorItem colorItem, String size) {
         this.id = id;
         this.colorItem = colorItem;
         this.size = size;
-        this.stock = stock;
     }
 
     public ColorItemSizeStock(Long id) {

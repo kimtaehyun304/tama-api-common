@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 @Slf4j
 public class MemberEventConsumer {
-    private final String MEMBER_TOPIC = "member_topic";
+    private final String MEMBER_SYNC_TOPIC = "member_sync_topic";
 
     private final MemberRepository memberRepository;
     private final MemberFeignClient memberFeignClient;
@@ -26,8 +26,8 @@ public class MemberEventConsumer {
             attempts = "3",
             backoff = @Backoff(delay = 5000, multiplier = 2)
     )
-    @KafkaListener(topics = MEMBER_TOPIC, groupId = "member_consumer_group")
-    public void consumeOrderCreatedEvent(MemberCreatedEvent event, Acknowledgment ack) {
+    @KafkaListener(topics = MEMBER_SYNC_TOPIC, groupId = "member_consumer_group")
+    public void consumeMemberCreatedEvent(MemberCreatedEvent event, Acknowledgment ack) {
         Long memberId = event.memberId();
         Member member = memberFeignClient.findMember(memberId).toEntity();
         memberRepository.save(member);

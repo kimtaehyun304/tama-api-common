@@ -21,7 +21,7 @@ public class ColorItemSizeStockResponse {
 
     public ColorItemSizeStock toEntity() {
         ColorItem colorItem = new ColorItem(colorItemId);
-        return new ColorItemSizeStock(id, colorItem, size, stock);
+        return new ColorItemSizeStock(id, colorItem, size);
     }
 
 }

@@ -79,13 +79,12 @@ public class ItemService {
     }
 
     public void saveColorItemSizeStocks(List<ColorItemSizeStock> colorItemSizeStocks) {
-        jdbcTemplate.batchUpdate("INSERT INTO color_item_size_stock(color_item_size_stock_id, color_item_id, size, stock) values (?, ?, ?, ?)", new BatchPreparedStatementSetter() {
+        jdbcTemplate.batchUpdate("INSERT INTO color_item_size_stock(color_item_size_stock_id, color_item_id, size) values (?, ?, ?)", new BatchPreparedStatementSetter() {
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {
                 ps.setLong(1, colorItemSizeStocks.get(i).getId());
                 ps.setLong(2, colorItemSizeStocks.get(i).getColorItem().getId());
                 ps.setString(3, colorItemSizeStocks.get(i).getSize());
-                ps.setInt(4, colorItemSizeStocks.get(i).getStock());
             }
             @Override
             public int getBatchSize() {
@@ -114,50 +113,5 @@ public class ItemService {
 
 
     //------------fegin로직-----------------
-    public void decreaseStock(Long colorItemSizeStockId, int quantity){
-        //동시에 요청 오면, UPDATE 전에 재고 조회하는 게 의미가 없음
-        //단일 요청이면 의미 있긴한데, 밑에 update 쿼리만으로 재고 부족 예외 throw 가능
-        //그래서 if(db.stock - quantity < 0) throw 로직 제거
-
-        //변경 감지는 갱실 분실 문제 발생 -> 직접 update로 배타적 락으로 예방
-        int updated = em.createQuery("update ColorItemSizeStock c set c.stock = c.stock-:quantity " +
-                        "where c.id = :id and c.stock >= :quantity")
-                .setParameter("quantity", quantity)
-                .setParameter("id", colorItemSizeStockId)
-                .executeUpdate();
-
-        //재고보다 주문양이 많으면 업데이트 된 row 없는 걸 이용
-        if (updated == 0)
-            throw new NotEnoughStockException();
-    }
-
-    public void decreaseStocks(List<OrderItem> orderItems){
-        for (OrderItem orderItem : orderItems) {
-            decreaseStock(orderItem.getColorItemSizeStock().getId(), orderItem.getCount());
-        }
-    }
-
-    /*
-    public void increaseStock(Long colorItemSizeStockId, int quantity){
-        //동시에 요청 오면, UPDATE 전에 재고 조회하는 게 의미가 없음
-        //단일 요청이면 의미 있긴한데, 밑에 update 쿼리만으로 재고 부족 예외 throw 가능
-        //그래서 if(db.stock - quantity < 0) throw 로직 제거
-
-        //변경 감지는 갱실 분실 문제 발생 -> 직접 update로 배타적 락으로 예방
-        int updated = em.createQuery("update ColorItemSizeStock c set c.stock = c.stock + :quantity " +
-                        "where c.id = :id and c.stock >= :quantity")
-                .setParameter("quantity", quantity)
-                .setParameter("id", colorItemSizeStockId)
-                .executeUpdate();
-
-    }
-
-    public void increaseStocks(List<OrderItemFeignResponse> responses){
-        for (OrderItemFeignResponse response : responses) {
-            increaseStock(response.colorItemSizeStockId(), response.count());
-        }
-    }
-    */
-
 
 }
