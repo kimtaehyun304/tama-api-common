@@ -55,6 +55,7 @@ public class ItemQueryRepository {
     //--------------------------------------------------------------------------------------------------------------------------------------------------------
     //★카테고리 베스트 아이템 (인기 상품 조회)
     //SQL SUM 함수 때문에 느려서 캐시 사용
+    //데스트 데이터라 어제꺼 없어서 전체 날짜 범위로 함
     public List<CategoryBestItemQueryResponse> findCategoryBestItemWithPaging(List<Long> categoryIds, CustomPageRequest customPageRequest) {
         List<CategoryBestItemQueryResponse> categoryBestItemQueryResponses = queryFactory.select
                         (new QCategoryBestItemQueryResponse(item.id, colorItem.id, item.name, item.originalPrice, item.nowPrice)).from(orderItem)

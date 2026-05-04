@@ -7,9 +7,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.tamaapi.domain.order.Order;
 import org.example.tamaapi.domain.order.OrderItem;
 
+import org.example.tamaapi.domain.order.OrderStatus;
 import org.example.tamaapi.feignClient.order.FullOrderItemResponse;
 import org.example.tamaapi.feignClient.order.FullOrderResponse;
 import org.example.tamaapi.feignClient.order.OrderFeignClient;
+import org.example.tamaapi.repository.order.OrderRepository;
+import org.example.tamaapi.util.ErrorMessageUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -31,16 +34,17 @@ public class OrderService {
     private final OrderFeignClient orderFeignClient;
     private final ItemService itemService;
     private final OrderTxService orderTxService;
+    private final OrderRepository orderRepository;
 
-    public void syncOrder(Long orderId){
+    public void saveOrder(Long orderId){
         //db에 주문 반영
         FullOrderResponse res = orderFeignClient.getFullOrder(orderId);
-        System.out.println("res = " + res);
         Order order = res.ToEntity();
         List<OrderItem> orderItems = res.getOrderItems().stream().map(FullOrderItemResponse::toEntity).toList();
         orderTxService.saveOrder(order, orderItems);
         // 회원 msa 호출은 안해도 됨 (데이터 안 갖고 있기 떄문)
     }
+
 
     /*
     // syncItem에서 직접 호출해서 트랜잭션 발동 하지 않음 -> 쓰기 지연

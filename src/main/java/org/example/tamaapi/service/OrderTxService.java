@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.tamaapi.domain.order.Order;
 import org.example.tamaapi.domain.order.OrderItem;
+import org.example.tamaapi.domain.order.OrderStatus;
 import org.example.tamaapi.feignClient.order.FullOrderItemResponse;
 import org.example.tamaapi.feignClient.order.FullOrderResponse;
 import org.example.tamaapi.feignClient.order.OrderFeignClient;
@@ -19,9 +20,12 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 
+import static org.example.tamaapi.util.ErrorMessageUtil.NOT_FOUND_ORDER;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional
 public class OrderTxService {
 
     private final JdbcTemplate jdbcTemplate;
@@ -29,14 +33,12 @@ public class OrderTxService {
     private final OrderRepository orderRepository;
 
 
-    @Transactional
     public void saveOrder(Order order, List<OrderItem> orderItems){
         //data jpa save쓰면 pk 있어서 merge 발생해서 저장 안됨 (될때도 있던데 왠지는 모름)
         em.persist(order);
         em.flush();
         saveOrderItems(orderItems);
     }
-
 
     public void saveOrderItems(List<OrderItem> orderItems) {
         jdbcTemplate.batchUpdate("INSERT INTO order_item(order_id, color_item_size_stock_id, order_price, count) values (?, ?, ?, ?)", new BatchPreparedStatementSetter() {
@@ -54,6 +56,10 @@ public class OrderTxService {
         });
     }
 
-
+    public void updateOrderStatus(Long orderId, OrderStatus status) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new IllegalArgumentException(NOT_FOUND_ORDER));
+        order.changeStatus(status);
+    }
 
 }

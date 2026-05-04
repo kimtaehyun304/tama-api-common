@@ -6,7 +6,8 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-@FeignClient(name = "item-service", url = "http://localhost:5003"
+//k8s로 바꾸면서 url 옵션 생략
+@FeignClient(name = "item-service"
         , configuration = ItemFeignClientConfig.class
         , fallbackFactory = ItemFallbackFactory.class)
 public interface ItemFeignClient {

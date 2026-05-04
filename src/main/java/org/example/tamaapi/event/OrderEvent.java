@@ -8,9 +8,9 @@ import org.example.tamaapi.domain.EventType;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class OrderCreatedEvent {
+public class OrderEvent {
 
-    private final EventType eventType = EventType.ORDER_CREATED;
+    private EventType eventType;
     private Long orderId;
 
 }
