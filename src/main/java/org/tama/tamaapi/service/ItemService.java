@@ -1,0 +1,111 @@
+package org.tama.tamaapi.service;
+
+import jakarta.persistence.EntityManager;
+import lombok.RequiredArgsConstructor;
+
+import org.tama.tamaapi.domain.item.ColorItem;
+import org.tama.tamaapi.domain.item.ColorItemImage;
+import org.tama.tamaapi.domain.item.ColorItemSizeStock;
+import org.tama.tamaapi.domain.item.Item;
+
+
+import org.tama.tamaapi.feignClient.item.dto.ColorItemImageResponse;
+import org.tama.tamaapi.feignClient.item.dto.ColorItemResponse;
+import org.tama.tamaapi.feignClient.item.dto.ColorItemSizeStockResponse;
+import org.tama.tamaapi.feignClient.item.dto.ItemSyncResponse;
+import org.tama.tamaapi.repository.item.ItemRepository;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.List;
+
+@Service
+@Transactional
+@RequiredArgsConstructor
+public class ItemService {
+
+    private final JdbcTemplate jdbcTemplate;
+    private final EntityManager em;
+    private final ItemRepository itemRepository;
+
+
+    //-------------동기화 로직----------------
+    public void syncItem(ItemSyncResponse res){
+
+        //db에 상품 반영
+        saveItem(res.getItem().toEntity());
+
+        List<ColorItem> colorItems = res.getColorItems().stream().map(ColorItemResponse::toEntity).toList();
+        saveColorItems(colorItems);
+
+        List<ColorItemSizeStock> colorItemSizeStocks = res.getColorItemSizeStocks().stream().map(ColorItemSizeStockResponse::toEntity).toList();
+        saveColorItemSizeStocks(colorItemSizeStocks);
+
+        List<ColorItemImage> colorItemImages = res.getColorItemImages().stream().map(ColorItemImageResponse::toEntity).toList();
+        saveColorItemImages(colorItemImages);
+    }
+
+    // syncItem에서 직접 호출해서 트랜잭션 발동 하지 않음 -> 쓰기 지연
+    // flush로 insert 쿼리, 바로 실행하게 함
+    public void saveItem(Item item){
+        em.persist(item);
+        em.flush();
+    }
+
+    public void saveColorItems(List<ColorItem> colorItems) {
+
+        jdbcTemplate.batchUpdate("INSERT INTO color_item(color_item_id, item_id, color_id) values (?, ?, ?)", new BatchPreparedStatementSetter() {
+            @Override
+            public void setValues(PreparedStatement ps, int i) throws SQLException {
+                ps.setLong(1, colorItems.get(i).getId());
+                ps.setLong(2, colorItems.get(i).getItem().getId());
+                ps.setLong(3, colorItems.get(i).getColor().getId());
+            }
+            @Override
+            public int getBatchSize() {
+                return colorItems.size();
+            }
+        });
+    }
+
+    public void saveColorItemSizeStocks(List<ColorItemSizeStock> colorItemSizeStocks) {
+        jdbcTemplate.batchUpdate("INSERT INTO color_item_size_stock(color_item_size_stock_id, color_item_id, size) values (?, ?, ?)", new BatchPreparedStatementSetter() {
+            @Override
+            public void setValues(PreparedStatement ps, int i) throws SQLException {
+                ps.setLong(1, colorItemSizeStocks.get(i).getId());
+                ps.setLong(2, colorItemSizeStocks.get(i).getColorItem().getId());
+                ps.setString(3, colorItemSizeStocks.get(i).getSize());
+            }
+            @Override
+            public int getBatchSize() {
+                return colorItemSizeStocks.size();
+            }
+        });
+    }
+
+    public void saveColorItemImages(List<ColorItemImage> colorItemImages) {
+
+        jdbcTemplate.batchUpdate("INSERT INTO color_item_image(color_item_image_id, color_item_id, original_file_name, stored_file_name, sequence) values (?, ?, ?, ?, ?)", new BatchPreparedStatementSetter() {
+            @Override
+            public void setValues(PreparedStatement ps, int i) throws SQLException {
+                ps.setLong(1, colorItemImages.get(i).getId());
+                ps.setLong(2, colorItemImages.get(i).getColorItem().getId());
+                ps.setString(3, colorItemImages.get(i).getUploadFile().getOriginalFileName());
+                ps.setString(4, colorItemImages.get(i).getUploadFile().getStoredFileName());
+                ps.setInt(5, colorItemImages.get(i).getSequence());
+            }
+            @Override
+            public int getBatchSize() {
+                return colorItemImages.size();
+            }
+        });
+    }
+
+
+    //------------fegin로직-----------------
+
+}

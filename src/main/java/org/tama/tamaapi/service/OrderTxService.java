@@ -1,0 +1,61 @@
+package org.tama.tamaapi.service;
+
+import jakarta.persistence.EntityManager;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.tama.tamaapi.domain.order.Order;
+import org.tama.tamaapi.domain.order.OrderItem;
+import org.tama.tamaapi.domain.order.OrderStatus;
+import org.tama.tamaapi.repository.order.OrderRepository;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.List;
+
+import static org.tama.tamaapi.exception.ErrorMessageUtil.NOT_FOUND_ORDER;
+
+@Service
+@RequiredArgsConstructor
+@Slf4j
+@Transactional
+public class OrderTxService {
+
+    private final JdbcTemplate jdbcTemplate;
+    private final EntityManager em;
+    private final OrderRepository orderRepository;
+
+
+    public void saveOrder(Order order, List<OrderItem> orderItems){
+        //data jpa save쓰면 pk 있어서 merge 발생해서 저장 안됨 (될때도 있던데 왠지는 모름)
+        em.persist(order);
+        em.flush();
+        saveOrderItems(orderItems);
+    }
+
+    public void saveOrderItems(List<OrderItem> orderItems) {
+        jdbcTemplate.batchUpdate("INSERT INTO order_item(order_id, color_item_size_stock_id, order_price, count) values (?, ?, ?, ?)", new BatchPreparedStatementSetter() {
+            @Override
+            public void setValues(PreparedStatement ps, int i) throws SQLException {
+                ps.setLong(1, orderItems.get(i).getOrder().getId());
+                ps.setLong(2, orderItems.get(i).getColorItemSizeStock().getId());
+                ps.setInt(3, orderItems.get(i).getOrderPrice());
+                ps.setInt(4, orderItems.get(i).getCount());
+            }
+            @Override
+            public int getBatchSize() {
+                return orderItems.size();
+            }
+        });
+    }
+
+    public void updateOrderStatus(Long orderId, OrderStatus status) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new IllegalArgumentException(NOT_FOUND_ORDER));
+        order.changeStatus(status);
+    }
+
+}
