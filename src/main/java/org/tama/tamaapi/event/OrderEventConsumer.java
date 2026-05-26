@@ -67,6 +67,7 @@ public class OrderEventConsumer {
             default -> orderTxService.updateOrderStatus(event.getOrderId(), OrderStatus.valueOf(event.getEventType().name()));
         }
         ack.acknowledge();
+        log.info("주문 테이블 동기화 완료");
     }
 
 }

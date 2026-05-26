@@ -49,6 +49,7 @@ public class ItemEventConsumer {
         ItemSyncResponse res = itemFeignClient.getItem(event.itemId());
         itemService.syncItem(res);
         ack.acknowledge();
+        log.info("상품 테이블 동기화 완료");
     }
 
 }

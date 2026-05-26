@@ -30,5 +30,6 @@ public class MemberEventConsumer {
         Member member = memberFeignClient.findMember(memberId).toEntity();
         memberRepository.save(member);
         ack.acknowledge();
+        log.info("회원 테이블 동기화 완료");
     }
 }
